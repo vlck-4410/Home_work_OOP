@@ -13,7 +13,6 @@ class Product:
         self.quantity = quantity
 
 
-
 class Category:
     category_count = 0
     product_count = 0
