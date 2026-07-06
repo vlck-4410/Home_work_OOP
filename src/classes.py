@@ -12,22 +12,56 @@ class Product:
         self.price = price
         self.quantity = quantity
 
+    @classmethod
+    def new_product(cls, product_data: dict, existing_products: list = None):
+        """
+        Класс-метод для создания объекта из словаря с проверкой на дубликаты.
+        Если товар с таким именем уже есть в existing_products,
+        обновляет его количество и цену, возвращая измененный объект.
+        """
+        if existing_products:
+            for product in existing_products:
+                if product.name == product_data["name"]:
+                    product.quantity += product_data["quantity"]
+                    product.price = max(product.price, product_data["price"])
+                    return product
+        return cls(
+            name=product_data["name"],
+            description=product_data["description"],
+            price=product_data["price"],
+            quantity=product_data["quantity"]
+        )
+
 
 class Category:
     category_count = 0
     product_count = 0
     name = str
     description = str
-    products = list
+    __products = list
 
 
     def __init__(self, name, description, products):
         self.name = name
         self.description = description
-        self.products = products
+        self.__products = products
 
         Category.category_count += 1
         Category.product_count += len(products)
+
+        def add_product(self, product):
+            """Метод для добавления товарав приватный список категории"""
+            self.__products.append(product)
+            Category.product_count += 1
+
+        @property
+        def products(self):
+            """Геттер для вывода списка товаров в виде отформатированный
+            строк"""
+            products_strings = []
+            for product in self.__products:
+                products_strings.append(f'{product.name}, {product.price} руб. Остаток: {product.quantity} шт')
+            return '\n'.join(products_strings)
 
 
 if __name__ == "__main__":
