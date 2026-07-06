@@ -7,3 +7,4 @@ def read_file_products(path_to_file):
         data = json.load(json_file)
         return data
 
+
