@@ -1,84 +1,84 @@
 from src.read_file import read_file_products
 
-
 class Product:
-    name = str
-    description = str
-    __price = float
-    quantity = int
+    name: str
+    description: str
+    price: float
+    quantity: int
+
     def __init__(self, name, description, price, quantity):
         self.name = name
         self.description = description
-        self.__price = price
+        self.__price = price  # Делаем цену приватной (Задание 4)
         self.quantity = quantity
 
     @property
     def price(self):
+        """Геттер для цены."""
         return self.__price
 
     @price.setter
     def price(self, new_price):
-        if new_price < 0:
-            print('Цена не должна быть нулевая или отрицательная')
+        """Сеттер для цены с валидацией (Задание 4 + допка)."""
+        if new_price <= 0:
+            print("Цена не должна быть нулевая или отрицательная")
             return
 
-        if new_price <= self.__price:
-            user_choice = input(f'Вы уверены, что хотите снизить цену с {self.__price} до {new_price}? (y/n):')
-            if user_choice.lower() != 'y':
-                print('Снижение цены отменено')
+
+        if new_price < self.__price:
+            user_check = input("Цена снижается. Вы уверены, что хотите изменить цену? (y/n): ")
+            if user_check.lower() != 'y':
+                print("Отмена изменения цены.")
                 return
-            self.__price = new_price
+
+        self.__price = new_price
 
     @classmethod
-    def new_product(cls, product_data: dict, existing_products: list = None):
-        """
-        Класс-метод для создания объекта из словаря с проверкой на дубликаты.
-        Если товар с таким именем уже есть в existing_products,
-        обновляет его количество и цену, возвращая измененный объект.
-        """
-        if existing_products:
-            for product in existing_products:
-                if product.name == product_data["name"]:
-                    product.quantity += product_data["quantity"]
-                    product.price = max(product.price, product_data["price"])
-                    return product
-        return cls(
-            name=product_data["name"],
-            description=product_data["description"],
-            price=product_data["price"],
-            quantity=product_data["quantity"]
-        )
+    def new_product(cls, product_data: dict, existing_products=None):
+        """Класс-метод для создания объекта из словаря (Задание 3 + допка)."""
+        if existing_products is None:
+            existing_products = []
 
+        name = product_data["name"]
+        description = product_data["description"]
+        price = product_data["price"]
+        quantity = product_data["quantity"]
+
+        for product in existing_products:
+            if product.name == name:
+                product.quantity += quantity
+                product.price = max(product.price, price)
+                return product
+
+        return cls(name, description, price, quantity)
 
 class Category:
     category_count = 0
     product_count = 0
-    name = str
-    description = str
-    __products = list
-
+    name: str
+    description: str
 
     def __init__(self, name, description, products):
         self.name = name
         self.description = description
-        self.__products = products
+        self.__products = list(products)  # Приватный атрибут (Задание 1)
 
         Category.category_count += 1
+        # ИСПРАВЛЕНИЕ ПО ЗАМЕЧАНИЮ АЛЕКСАНДРЫ: используем += вместо = для накопления
         Category.product_count += len(products)
 
-        def add_product(self, product):
-            """Метод для добавления товарав приватный список категории"""
-            self.__products.append(product)
-            Category.product_count += 1
+    def add_product(self, product):
+        """Метод для добавления товара в категорию (Задание 1)."""
+        self.__products.append(product)
+        Category.product_count += 1
 
-        @property
-        def products(self):
-            """Геттер для вывода списка товаров в виде отформатированный
-            строк"""
-            products_strings = []
-            for product in self.__products:
-                products_strings.append(f'{product.name}, {product.price} руб. Остаток: {product.quantity} шт')
-            return '\n'.join(products_strings)
+    @property
+    def products(self):
+        """Геттер для вывода списка товаров в виде строк (Задание 2)."""
+        product_strings = []
+        for product in self.__products:
+            product_strings.append(f"{product.name}, {product.price} руб. Остаток: {product.quantity} шт.")
+        return "\n".join(product_strings)
 
 
 if __name__ == "__main__":

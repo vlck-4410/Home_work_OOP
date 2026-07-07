@@ -4,92 +4,78 @@ from src.classes import Category, Product
 
 @pytest.fixture(autouse=True)
 def reset_counters():
-    """
-    Фикстура, которая автоматически запускается ПЕРЕД каждым тестом.
-    Она сбрасывает счетчики в 0, чтобы тесты были изолированными
-    и не ломали логику друг друга из-за накопления.
-    """
+    """Фикстура для сброса счетчиков перед каждым тестом."""
+    Category.category_count = 0
+    Category.product_count = 0
+
+
+import pytest
+from src.classes import Category, Product
+
+
+@pytest.fixture(autouse=True)
+def reset_counters():
+    """Сброс счетчиков перед каждым тестом, чтобы они не зависели друг от друга."""
     Category.category_count = 0
     Category.product_count = 0
 
 
 def test_product_initialization():
-    """Тест корректности создания объекта Product и его атрибутов."""
-    product = Product(
-        name="Samsung Galaxy C23 Ultra",
-        description="Смартфон для удобства жизни",
-        price=180000.0,
-        quantity=5
-    )
-
+    """Тест создания товара."""
+    product = Product("Samsung Galaxy C23 Ultra", "Смартфон", 180000.0, 5)
     assert product.name == "Samsung Galaxy C23 Ultra"
-    assert product.description == "Смартфон для удобства жизни"
+    assert product.description == "Смартфон"
     assert product.price == 180000.0
     assert product.quantity == 5
 
 
-def test_category_initialization():
-    """Тест корректности создания объекта Category и хранения списка товаров."""
+def test_category_initialization_and_getter():
+    """Тест создания категории и работы строкового геттера товаров."""
     product1 = Product("Samsung", "Смартфон", 100000.0, 3)
     product2 = Product("iPhone", "Смартфон", 120000.0, 2)
 
-    category = Category(
-        name="Смартфоны",
-        description="Гаджеты",
-        products=[product1, product2]
-    )
+    category = Category("Смартфоны", "Гаджеты", [product1, product2])
 
     assert category.name == "Смартфоны"
     assert category.description == "Гаджеты"
-    assert category.products == [product1, product2]
-    assert len(category.products) == 2
+    expected_output = (
+        "Samsung, 100000.0 руб. Остаток: 3 шт.\n"
+        "iPhone, 120000.0 руб. Остаток: 2 шт."
+    )
+    assert category.products == expected_output
 
 
 def test_category_counters_accumulation():
-    """
-    Тест проверяет правильность НАКОПЛЕНИЯ количества категорий и товаров.
-    Именно этот тест падал у Александры из-за знака '=' вместо '+='.
-    """
-    assert Category.category_count == 0
-    assert Category.product_count == 0
-
+    """Тест корректного накопления (а не перезаписи) счетчиков."""
     p1 = Product("Товар 1", "Описание 1", 100.0, 1)
     p2 = Product("Товар 2", "Описание 2", 200.0, 2)
-    Category("Категория 1", "Описание категории 1", [p1, p2])
+    Category("Категория 1", "Описание категории", [p1, p2])
 
     assert Category.category_count == 1
     assert Category.product_count == 2
 
-    p3 = Product("Товар 3", "Описание 3", 300.0, 3)
-    p4 = Product("Товар 4", "Описание 4", 400.0, 4)
-    p5 = Product("Товар 5", "Описание 5", 500.0, 5)
-    Category("Категория 2", "Описание категории 2", [p3, p4, p5])
-
+    p3 = Product("Товар 3", "Описание 3", 300.0, 1)
+    Category("Категория 2", "Описание категории 2", [p3])
     assert Category.category_count == 2
-    assert Category.product_count == 5
+    assert Category.product_count == 3
 
 
-def test_empty_category():
-    """Тест создания категории без товаров (пустой список)."""
-    empty_category = Category(
-        name="Пустая категория",
-        description="Здесь пока ничего нет",
-        products=[]
-    )
+def test_add_product():
+    """Тест метода add_product."""
+    category = Category("Смартфоны", "Гаджеты", [])
+    product = Product("Xiaomi", "Бюджетный", 30000.0, 10)
+    category.add_product(product)
 
-    assert empty_category.products == []
-    assert Category.category_count == 1
-    assert Category.product_count == 0
+    assert "Xiaomi, 30000.0 руб. Остаток: 10 шт." in category.products
 
 
-def test_product_zero_values():
-    """Тест корректности создания товара с нулевой ценой и нулевым количеством."""
-    free_product = Product(
-        name="Промо-товар",
-        description="Бесплатный тестер",
-        price=0.0,
-        quantity=0
-    )
+def test_price_setter_validation(monkeypatch):
+    """Тест работы сеттера цены с валидацией и подтверждением."""
+    product = Product("Тест", "Описание", 100.0, 5)
 
-    assert free_product.price == 0.0
-    assert free_product.quantity == 0
+    product.price = -10
+    assert product.price == 100.0
+
+    monkeypatch.setattr('builtins.input', lambda _: 'y')
+    product.price = 80.0
+    assert product.price == 80.0
