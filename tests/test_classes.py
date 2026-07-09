@@ -1,5 +1,4 @@
 import pytest
-from src.classes import Category, Product
 
 
 @pytest.fixture(autouse=True)
