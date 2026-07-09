@@ -4,7 +4,6 @@ from src.read_file import read_file_products
 
 def test_read_file_products_success(tmp_path):
     """Тест успешного чтения корректного JSON-файла с данными."""
-    # 1. Готовим фейковые данные, полностью повторяющие структуру твоего products.json
     mock_data = [
         {
             "name": "Смартфоны",
