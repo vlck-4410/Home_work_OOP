@@ -1,6 +1,5 @@
 import json
 import pytest
-
 from src.read_file import read_file_products
 
 def test_read_file_products_success(tmp_path):

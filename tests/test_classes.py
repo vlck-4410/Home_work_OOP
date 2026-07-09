@@ -1,15 +1,11 @@
 import pytest
-
+from src.classes import Category, Product
 
 @pytest.fixture(autouse=True)
 def reset_counters():
     """Фикстура для сброса счетчиков перед каждым тестом."""
     Category.category_count = 0
     Category.product_count = 0
-
-
-import pytest
-from src.classes import Category, Product
 
 
 @pytest.fixture(autouse=True)
