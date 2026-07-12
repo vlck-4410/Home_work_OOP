@@ -37,6 +37,10 @@ class Product:
         """Строковое отображение товара."""
         return f"{self.name}, {self.price} руб. Остаток: {self.quantity} шт."
 
+    def __add__(self, other):
+        """Магический метод для складывания двух товаров."""
+        return (self.price * self.quantity) + (other.price * other.quantity)
+
     @classmethod
     def new_product(cls, product_data: dict, existing_products=None):
         """Класс-метод для создания объекта из словаря (Задание 3 + допка)."""

@@ -91,3 +91,10 @@ def test_category_str_representation():
     category = Category('Смартфоны', "Гаджеты", [product_1, product_2])
 
     assert str(category) =="Смартфоны, количество продуктов: 5 шт."
+
+def test_product_addition():
+    """Тест магического метода __add__ для класса Product."""
+    product_1 = Product('Товар А', "Описание А", 100.0, 10)
+    product_2 = Product('Товар Б', "Описание Б", 200.0, 2)
+
+    assert product_1 + product_2 == 1400.0
