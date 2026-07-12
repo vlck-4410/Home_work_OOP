@@ -1,4 +1,6 @@
 import pytest
+from h11 import PRODUCT_ID
+
 from src.classes import Category, Product
 
 @pytest.fixture(autouse=True)
@@ -74,3 +76,18 @@ def test_price_setter_validation(monkeypatch):
     monkeypatch.setattr('builtins.input', lambda _: 'y')
     product.price = 80.0
     assert product.price == 80.0
+
+
+def test_product_str_representation():
+    """Тест магического метода __str__ для класса Product."""
+    product = Product('Samsung Galaxy S25 Ultra', "Смартфон", 90000.0, 5)
+    assert str(product) == "Samsung Galaxy S25 Ultra, 90000.0 руб. Остаток: 5 шт."
+
+
+def test_category_str_representation():
+    """Тест магического метода __str__ для класса Category."""
+    product_1 = Product('Samsung','Смартфон', 100000.0, 3)
+    product_2 = Product('Iphone', 'Смартфон', 120000.0, 2)
+    category = Category('Смартфоны', "Гаджеты", [product_1, product_2])
+
+    assert str(category) =="Смартфоны, количество продуктов: 5 шт."

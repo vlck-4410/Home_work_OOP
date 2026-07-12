@@ -33,6 +33,10 @@ class Product:
 
         self.__price = new_price
 
+    def __str__(self):
+        """Строковое отображение товара."""
+        return f"{self.name}, {self.price} руб. Остаток: {self.quantity} шт."
+
     @classmethod
     def new_product(cls, product_data: dict, existing_products=None):
         """Класс-метод для создания объекта из словаря (Задание 3 + допка)."""
@@ -74,11 +78,14 @@ class Category:
 
     @property
     def products(self):
-        """Геттер для вывода списка товаров в виде строк (Задание 2)."""
-        product_strings = []
-        for product in self.__products:
-            product_strings.append(f"{product.name}, {product.price} руб. Остаток: {product.quantity} шт.")
-        return "\n".join(product_strings)
+        """Оптимизированный геттер для вывода списка товаров через str()."""
+        return '\n'.join([str(product) for product in self.__products])
+
+
+    def __str__(self):
+        """Строковое отображение категории с подсчетом всех товаров на складе"""
+        total_quantity = sum(product.quantity for product in self.__products)
+        return f'{self.name}, количество продуктов: {total_quantity} шт.'
 
 
 if __name__ == "__main__":
