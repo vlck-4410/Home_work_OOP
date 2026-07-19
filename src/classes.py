@@ -38,7 +38,14 @@ class Product:
         return f"{self.name}, {self.price} руб. Остаток: {self.quantity} шт."
 
     def __add__(self, other):
-        """Магический метод для складывания двух товаров."""
+        """
+        Магический метод для складывания двух товаров.
+        Возвращает общую стоимость всех единиц обоих товаров на складе.
+        Вызывает TypeError, если товары принадлежат к разным классам.
+        """
+        if type(self) is not type(other):
+            raise TypeError("Нельзя складывать товары разных классов.")
+
         return (self.price * self.quantity) + (other.price * other.quantity)
 
     @classmethod
@@ -60,6 +67,25 @@ class Product:
 
         return cls(name, description, price, quantity)
 
+class Smartphone(Product):
+    """Класс-наследник для описания смартфонов."""
+
+    def __init__(self, name, description, price, quantity, efficiency, model, memory, color):
+        super().__init__(name, description, price, quantity)
+        self.efficiency = efficiency
+        self.model = model
+        self.memory = memory
+        self.color = color
+
+class LawnGrass(Product):
+    """Класс-наследник для описания газонной травы."""
+
+    def __init__(self, name, description, price, quantity, country, germination_period, color):
+        super().__init__(name, description, price, quantity)
+        self.country = country
+        self.germination_period = germination_period
+        self.color = color
+
 class Category:
     category_count = 0
     product_count = 0
@@ -72,13 +98,17 @@ class Category:
         self.__products = list(products)  # Приватный атрибут (Задание 1)
 
         Category.category_count += 1
-        # ИСПРАВЛЕНИЕ ПО ЗАМЕЧАНИЮ АЛЕКСАНДРЫ: используем += вместо = для накопления
         Category.product_count += len(products)
 
     def add_product(self, product):
-        """Метод для добавления товара в категорию (Задание 1)."""
+        """
+        Добавляет продукт в категорию.
+        Вызывает TypeError, если передаваемый объект не является продуктом или его наследником.
+        """
+        if not isinstance(product, Product):
+            raise TypeError("Добавлять можно только объекты класса Product или его наследников.")
+
         self.__products.append(product)
-        Category.product_count += 1
 
     @property
     def products(self):
