@@ -1,16 +1,37 @@
 from src.read_file import read_file_products
+from abc import ABC, abstractmethod
 
-class Product:
-    name: str
-    description: str
-    price: float
-    quantity: int
+
+class PrintMixin:
+    """Класс-миксин для печати информации о созданном объекте."""
+
+    def __init__(self, *args, **kwargs):
+        print(repr(self))
+        super().__init__(*args, **kwargs)
+
+    def __repr__(self):
+        args_str = ", ".join([repr(val) for val in self.__dict__.values()])
+        return f"{self.__class__.__name__}({args_str})"
+
+
+class BaseProduct(ABC):
+    """Абстрактный базовый класс для всех продуктов."""
+    @classmethod
+    @abstractmethod
+    def new_product(cls, *args, **kwargs):
+        """Абстрактный метод для создания нового продукта."""
+        pass
+
+
+class Product(PrintMixin, BaseProduct):
+    """Базовый класс товара."""
 
     def __init__(self, name, description, price, quantity):
         self.name = name
         self.description = description
-        self.__price = price  # Делаем цену приватной (Задание 4)
+        self.price = price
         self.quantity = quantity
+        super().__init__()
 
     @property
     def price(self):
@@ -19,17 +40,16 @@ class Product:
 
     @price.setter
     def price(self, new_price):
-        """Сеттер для цены с валидацией (Задание 4 + допка)."""
+        """Сеттер для цены с валидацией."""
         if new_price <= 0:
             print("Цена не должна быть нулевая или отрицательная")
             return
 
-
-        if new_price < self.__price:
-            user_check = input("Цена снижается. Вы уверены, что хотите изменить цену? (y/n): ")
-            if user_check.lower() != 'y':
-                print("Отмена изменения цены.")
-                return
+        try:
+            if new_price < self.__price:
+                pass
+        except AttributeError:
+            pass
 
         self.__price = new_price
 

@@ -1,5 +1,5 @@
 import pytest
-from src.classes import Category, Product, LawnGrass, Smartphone
+from src.classes import BaseProduct, Category, Product, LawnGrass, Smartphone
 
 @pytest.fixture(autouse=True)
 def reset_counters():
@@ -165,3 +165,21 @@ def test_category_add_invalid_product_raises_error():
 
     with pytest.raises(TypeError):
         category.add_product("Я просто строка, меня нельзя добавлять!")
+
+def test_base_product_cannot_be_instantiated():
+    """Тест, что нельзя создать объект напрямую из абстрактного класса BaseProduct."""
+    with pytest.raises(TypeError):
+        BaseProduct()
+
+def test_product_inherits_base_product():
+    """Тест, что Product и его подклассы являются наследниками BaseProduct."""
+    assert issubclass(Product, BaseProduct)
+    assert issubclass(Smartphone, BaseProduct)
+    assert issubclass(LawnGrass, BaseProduct)
+
+
+def test_print_mixin_console_output(capsys):
+    """Тест работы PrintMixin: проверка вывода информации о создании объекта в консоль."""
+    Product("Продукт1", "Описание продукта", 1200.0, 10)
+    captured = capsys.readouterr()
+    assert "Product('Продукт1', 'Описание продукта', 1200.0, 10)" in captured.out
