@@ -112,6 +112,7 @@ class Category:
     name: str
     description: str
 
+
     def __init__(self, name, description, products):
         self.name = name
         self.description = description
