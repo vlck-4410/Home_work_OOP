@@ -1,7 +1,5 @@
 import pytest
-from h11 import PRODUCT_ID
-
-from src.classes import Category, Product
+from src.classes import BaseProduct, Category, Product, LawnGrass, Smartphone
 
 @pytest.fixture(autouse=True)
 def reset_counters():
@@ -98,3 +96,90 @@ def test_product_addition():
     product_2 = Product('Товар Б', "Описание Б", 200.0, 2)
 
     assert product_1 + product_2 == 1400.0
+
+def test_smartphone_initialization():
+    """Тест создания объекта класса Smartphone."""
+    smartphone = Smartphone(
+        name="iPhone 15",
+        description="Флагман от Apple",
+        price=120000.0,
+        quantity=10,
+        efficiency="Высокая",
+        model="Pro Max",
+        memory=256,
+        color="Титановый"
+    )
+    assert smartphone.name == "iPhone 15"
+    assert smartphone.price == 120000.0
+    assert smartphone.efficiency == "Высокая"
+    assert smartphone.model == "Pro Max"
+    assert smartphone.memory == 256
+    assert smartphone.color == "Титановый"
+
+def test_lawngrass_initialization():
+    """Тест создания объекта класса LawnGrass."""
+    grass = LawnGrass(
+        name="Изумруд",
+        description="Быстрорастущий красивый газон",
+        price=500.0,
+        quantity=50,
+        country="Нидерланды",
+        germination_period="10–14 дней",
+        color="Ярко-зеленый"
+    )
+    assert grass.name == "Изумруд"
+    assert grass.quantity == 50
+    assert grass.country == "Нидерланды"
+    assert grass.germination_period == "10–14 дней"
+    assert grass.color == "Ярко-зеленый"
+
+
+def test_product_addition_same_type():
+    """Тест успешного сложения товаров одного класса (Смартфонов)."""
+    sp1 = Smartphone("iPhone 15", "Apple", 100000.0, 2, "Высокая", "15", 256, "Черный")
+    sp2 = Smartphone("Xiaomi 14", "Xiaomi", 80000.0, 3, "Высокая", "14", 512, "Серый")
+
+    assert sp1 + sp2 == 440000.0
+
+
+def test_product_addition_different_types_raises_error():
+    """Тест, что сложение товаров разных классов вызывает TypeError."""
+    smartphone = Smartphone("iPhone 15", "Apple", 120000.0, 2, "Высокая", "15", 256, "Черный")
+    grass = LawnGrass("Изумруд", "Газон", 500.0, 10, "РФ", "7 дней", "Зеленый")
+
+    with pytest.raises(TypeError):
+        _ = smartphone + grass
+
+
+def test_category_add_subclass_product():
+    """Тест успешного добавления наследника класса Product в категорию."""
+    category = Category("Электроника", "Техника", [])
+    smartphone = Smartphone("iPhone 15", "Apple", 120000.0, 2, "Высокая", "15", 256, "Черный")
+    category.add_product(smartphone)
+    assert "iPhone 15" in category.products
+
+
+def test_category_add_invalid_product_raises_error():
+    """Тест, что добавление стороннего объекта в категорию вызывает TypeError."""
+    category = Category("Электроника", "Техника", [])
+
+    with pytest.raises(TypeError):
+        category.add_product("Я просто строка, меня нельзя добавлять!")
+
+def test_base_product_cannot_be_instantiated():
+    """Тест, что нельзя создать объект напрямую из абстрактного класса BaseProduct."""
+    with pytest.raises(TypeError):
+        BaseProduct()
+
+def test_product_inherits_base_product():
+    """Тест, что Product и его подклассы являются наследниками BaseProduct."""
+    assert issubclass(Product, BaseProduct)
+    assert issubclass(Smartphone, BaseProduct)
+    assert issubclass(LawnGrass, BaseProduct)
+
+
+def test_print_mixin_console_output(capsys):
+    """Тест работы PrintMixin: проверка вывода информации о создании объекта в консоль."""
+    Product("Продукт1", "Описание продукта", 1200.0, 10)
+    captured = capsys.readouterr()
+    assert "Product('Продукт1', 'Описание продукта', 1200.0, 10)" in captured.out
