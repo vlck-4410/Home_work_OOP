@@ -183,3 +183,21 @@ def test_print_mixin_console_output(capsys):
     Product("Продукт1", "Описание продукта", 1200.0, 10)
     captured = capsys.readouterr()
     assert "Product('Продукт1', 'Описание продукта', 1200.0, 10)" in captured.out
+
+def test_product_init_zero_value_error():
+    with pytest.raises(ValueError, match = 'Товар с нулевым количеством не может быть добавлен'):
+        Product("Бракованный товар", "Описание", 100.0, 0)
+
+
+def test_category_middle_price():
+    """Тест расчета среднего ценника товаров в категории."""
+    product1 = Product("Товар 1", "Описание 1", 100.0, 10)
+    product2 = Product("Товар 2", "Описание 2", 200.0, 5)
+    category = Category("Разное", "Описание", [product1, product2])
+
+    assert category.middle_price() == 150.0
+
+def test_category_middle_price_empty():
+    """Тест расчета среднего ценника для категории без товаров (ZeroDivisionError)."""
+    empty_category = Category("Пустая категория", "Описание", [])
+    assert empty_category.middle_price() == 0
