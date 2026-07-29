@@ -1,16 +1,40 @@
 from src.read_file import read_file_products
+from abc import ABC, abstractmethod
 
-class Product:
-    name: str
-    description: str
-    price: float
-    quantity: int
+
+class PrintMixin:
+    """Класс-миксин для печати информации о созданном объекте."""
+
+    def __init__(self, *args, **kwargs):
+        print(repr(self))
+        super().__init__(*args, **kwargs)
+
+    def __repr__(self):
+        args_str = ", ".join([repr(val) for val in self.__dict__.values()])
+        return f"{self.__class__.__name__}({args_str})"
+
+
+class BaseProduct(ABC):
+    """Абстрактный базовый класс для всех продуктов."""
+    @classmethod
+    @abstractmethod
+    def new_product(cls, *args, **kwargs):
+        """Абстрактный метод для создания нового продукта."""
+        pass
+
+
+class Product(PrintMixin, BaseProduct):
+    """Базовый класс товара."""
 
     def __init__(self, name, description, price, quantity):
+        if quantity <= 0:
+            raise ValueError('Товар с нулевым количеством не может быть добавлен')
+
         self.name = name
         self.description = description
-        self.__price = price  # Делаем цену приватной (Задание 4)
+        self.price = price
         self.quantity = quantity
+        super().__init__()
 
     @property
     def price(self):
@@ -19,17 +43,16 @@ class Product:
 
     @price.setter
     def price(self, new_price):
-        """Сеттер для цены с валидацией (Задание 4 + допка)."""
+        """Сеттер для цены с валидацией."""
         if new_price <= 0:
             print("Цена не должна быть нулевая или отрицательная")
             return
 
-
-        if new_price < self.__price:
-            user_check = input("Цена снижается. Вы уверены, что хотите изменить цену? (y/n): ")
-            if user_check.lower() != 'y':
-                print("Отмена изменения цены.")
-                return
+        try:
+            if new_price < self.__price:
+                pass
+        except AttributeError:
+            pass
 
         self.__price = new_price
 
@@ -38,7 +61,14 @@ class Product:
         return f"{self.name}, {self.price} руб. Остаток: {self.quantity} шт."
 
     def __add__(self, other):
-        """Магический метод для складывания двух товаров."""
+        """
+        Магический метод для складывания двух товаров.
+        Возвращает общую стоимость всех единиц обоих товаров на складе.
+        Вызывает TypeError, если товары принадлежат к разным классам.
+        """
+        if type(self) is not type(other):
+            raise TypeError("Нельзя складывать товары разных классов.")
+
         return (self.price * self.quantity) + (other.price * other.quantity)
 
     @classmethod
@@ -60,11 +90,40 @@ class Product:
 
         return cls(name, description, price, quantity)
 
+class Smartphone(Product):
+    """Класс-наследник для описания смартфонов."""
+
+    def __init__(self, name, description, price, quantity, efficiency, model, memory, color):
+        super().__init__(name, description, price, quantity)
+        self.efficiency = efficiency
+        self.model = model
+        self.memory = memory
+        self.color = color
+
+class LawnGrass(Product):
+    """Класс-наследник для описания газонной травы."""
+
+    def __init__(self, name, description, price, quantity, country, germination_period, color):
+        super().__init__(name, description, price, quantity)
+        self.country = country
+        self.germination_period = germination_period
+        self.color = color
+
 class Category:
     category_count = 0
     product_count = 0
     name: str
     description: str
+
+
+    def middle_price(self):
+        """Подсчет средний ценник всех товаров в категории"""
+        try:
+            total_sum = sum(product.price for product in self.__products)
+            return total_sum / len(self.__products)
+        except ZeroDivisionError:
+            return 0
+
 
     def __init__(self, name, description, products):
         self.name = name
@@ -72,13 +131,17 @@ class Category:
         self.__products = list(products)  # Приватный атрибут (Задание 1)
 
         Category.category_count += 1
-        # ИСПРАВЛЕНИЕ ПО ЗАМЕЧАНИЮ АЛЕКСАНДРЫ: используем += вместо = для накопления
         Category.product_count += len(products)
 
     def add_product(self, product):
-        """Метод для добавления товара в категорию (Задание 1)."""
+        """
+        Добавляет продукт в категорию.
+        Вызывает TypeError, если передаваемый объект не является продуктом или его наследником.
+        """
+        if not isinstance(product, Product):
+            raise TypeError("Добавлять можно только объекты класса Product или его наследников.")
+
         self.__products.append(product)
-        Category.product_count += 1
 
     @property
     def products(self):
